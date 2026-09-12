@@ -1,0 +1,17 @@
+# build output
+bin/
+dist/
+/omacy
+/e2e/e2e
+/e2e/manage
+
+# go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum

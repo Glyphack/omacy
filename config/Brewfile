@@ -1,0 +1,13 @@
+cask "font-hack-nerd-font"
+
+cask "hammerspoon"
+cask "karabiner-elements"
+brew "fish"
+brew "mise"
+
+# Apps
+cask "iina"
+cask "monitorcontrol"
+cask "zed"
+cask "brave-browser"
+brew "duti"

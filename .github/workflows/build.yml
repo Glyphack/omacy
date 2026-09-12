@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build macOS binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: darwin
+          GOARCH: arm64
+        run: go build -trimpath -ldflags="-s -w" -o dist/omacy-darwin-arm64 .
+
+      - name: Publish dev build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete dev --yes --cleanup-tag || true
+          gh release create dev dist/* \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "dev build" \
+            --notes "Latest build of ${GITHUB_REF_NAME} at ${GITHUB_SHA}. Replaced on every push."

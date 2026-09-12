@@ -1,0 +1,4 @@
+[tools]
+go = { version = "1.26", lazy = true }
+fzf = { version = "0.74.4" }
+ripgrep = { version = "15.2.0", lazy = true }

@@ -268,6 +268,10 @@ func main() {
 		h.Fatal("Configuring mise failed", "err", err)
 	}
 
+	if err := runStep(ctx, "Configuring & Installing Flameshot", setupFlameshot); err != nil {
+		h.Fatal("Configuring Flameshot failed", "err", err)
+	}
+
 	if *installAppsOnly {
 		return
 	}

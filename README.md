@@ -58,13 +58,25 @@ You can remap keys and change what they do.
 
 [Mise](https://mise.jdx.dev/) installs all your developer tools like compilers and command-line tools.
 
+### Raycast
+
+Raycast is a nice tool but it's not configurable from the command line. It's installed but you have to configure it yourself.
+
+Suggested hotkeys to set:
+
+- Clipboard history
+- Raycast notes
+
+These two features are so well designed that I prefer using the tool just for these.
+I also use it to open asks given the unusable state of MacOS's Spotlight.
+
 ## Mac Settings
 
 Omacy sets sane defaults in MacOS settings app.
 
 The full list of these settings are:
 
-## Trackpad, mouse and keyboard
+Trackpad, mouse and keyboard
 - Counts a light tap as a click, both after login and on the login screen.
 - Makes the bottom right corner of the trackpad act as a right click.
 - Speeds up pointer movement for both mouse and trackpad.
@@ -75,18 +87,18 @@ The full list of these settings are:
 - Turns off automatic spelling correction while you type.
 - Stops the offer to enable dictation when you press fn twice.
 
-## Security
+Security
 - Turns the firewall on, so only apps you allow can accept connections from outside.
 - Turns on stealth mode, so the mac stays silent when someone pings it and does not show up in network scans.
 - Stops other macs from sending AppleScript commands to this one (remote Apple events).
 - Stops the mac from waking up when network traffic arrives for it. Marked optional.
 - Removes the guest user from the login screen.
 
-## Menu bar
+Menu bar
 - Puts the WiFi icon in the menu bar.
 - Removes the Spotlight search icon from the menu bar.
 
-## Dock and Mission Control
+Dock and Mission Control
 - Removes every pinned app, folder and file from the dock. So you can pin what you want.
 - Highlights the icon under the pointer when a stack opens as a grid.
 - Sets dock icon size to 36 pixels.
@@ -99,12 +111,12 @@ The full list of these settings are:
 - Makes icons of hidden apps half transparent.
 - Keeps recent and suggested apps out of the dock.
 
-## Screen
+Screen
 - Asks for your password right away when the screen saver or sleep starts, with no grace period.
 - Saves screenshots to the Desktop as png files with no window shadow.
 - Enables extra sharp display resolutions in display settings, visible after a restart.
 
-## Finder
+Finder
 - Shows file extensions.
 - Sorts folders above files in every list.
 - Sorts lists by the date a file was last changed. Marked optional.
@@ -123,7 +135,7 @@ The full list of these settings are:
 - Removes the confirmation before emptying the trash.
 - Expands the general, open with and permissions sections of the get info window.
 
-## Default apps
+Default apps
 - Makes IINA the default app for video files. Marked optional.
 
 

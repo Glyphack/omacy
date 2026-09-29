@@ -395,4 +395,8 @@ func main() {
 			fmt.Println("Hammerspoon permissions are not granted. Open the app and enable it later yourself.")
 		}
 	}
+
+	fmt.Println("Opening Raycast now. Read through the documentation to set it up because Raycast cannot be set up automatically.")
+	fmt.Println("https://manual.raycast.com/")
+	runOpen(ctx, "-a", "Raycast")
 }

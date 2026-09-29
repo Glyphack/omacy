@@ -26,6 +26,7 @@ cask "iina"
 cask "monitorcontrol"
 cask "brave-browser"
 cask "zed"
+cask "raycast"
 ```
 
 ### Fish
@@ -116,6 +117,9 @@ Screen
 - Saves screenshots to the Desktop as png files with no window shadow.
 - Enables extra sharp display resolutions in display settings, visible after a restart.
 
+Accessibility
+- Turns on reduce motion, so switching spaces and opening windows fade instead of slide.
+
 Finder
 - Shows file extensions.
 - Sorts folders above files in every list.
@@ -156,10 +160,12 @@ So you can set hotkeys on Caps Lock + Any other key without conflict with other 
 When Caps Lock is pressed it acts as escape key, a must have for any vim user.
 
 
-2. Copy without formatting
+2. Paste without formatting
 
 Isn't it so annoying that you copy a text from a website and when pasting it somewhere it makes the font bold and shit?
-Yeah that's gone.
+Press `CMD + Shift + V` to paste text with no formatting. `CMD + V` pastes as usual, with the formatting and pictures.
+
+Browsers and Telegram already have this shortcut. Omacy adds it to Notes and Outlook.
 
 ### Hotkeys
 
@@ -176,11 +182,50 @@ Shortcuts use Hyper Key you can customize it in hammerspoon config. By default t
 | Hyper + C | Center the current window |
 | Hyper + ] | Move the current window to the next screen |
 | Hyper + [ | Move the current window to the previous screen |
+| Hyper + M | Pick an open window and focus it |
 | Hyper + I | Fill the screen with the current window, press again to undo |
 | Hyper + J | Open Brave Browser|
 | Hyper + K | Open WezTerm |
+| Hyper + B | Pick a Browser bookmark and open it |
 | Hyper + T | Mute or unmute the microphone |
 | Ctrl + ` | Reload the Hammerspoon config |
+
+You can add your own hotkeys in `~/.hammerspoon/init.lua`. A hotkey on the same keys as a default one replaces it, and `nil` in place of the function turns the default off.
+
+```lua
+omacy:map("hyper u", function()
+	omacy.focus.launchOrFocusOrRotate({ app = "org.qutebrowser.qutebrowser" })
+end, "qutebrowser")
+omacy:map("hyper k", nil)
+omacy:showShortcuts()
+```
+
+Apps are picked by their bundle ID. To find the bundle ID of an app run `osascript -e 'id of app "Visual Studio Code"'`.
+
+Omacy binds all hotkeys when it starts at the end of the file. `omacy:showShortcuts()` prints the full list to the Hammerspoon console.
+
+### Favorite audio devices
+
+List the microphones and speakers you like best, in order, in `~/.hammerspoon/init.lua`:
+
+```lua
+omacy.audio.prefer({
+	output = { "WH-1000XM5", "MacBook Pro Speakers" },
+	input = { "Yeti Stereo Microphone", "MacBook Pro Microphone" },
+})
+```
+
+When a device is plugged in or removed, the first connected one from each list becomes the default.
+
+### Start apps on login
+
+List apps to start when Hammerspoon starts in `~/.hammerspoon/init.lua`:
+
+```lua
+omacy.autostart.launch({ "Todoist", "Raycast" })
+```
+
+Each app that is not running yet is started in the background and hidden a moment later. Use the app names as shown in Activity Monitor.
 
 ### Fish
 

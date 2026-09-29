@@ -1,26 +1,21 @@
 var rule = {
-  description: 'omacy: paste with no formatting in chat and browser apps',
+  description: 'omacy: cmd shift v pastes with no formatting',
   manipulators: [
     {
       type: 'basic',
-      from: { key_code: 'v', modifiers: { mandatory: ['command'] } },
+      from: { key_code: 'v', modifiers: { mandatory: ['command', 'shift'] } },
       to: [
         {
           key_code: 'v',
-          modifiers: ['command', 'shift'],
+          modifiers: ['command', 'shift', 'option'],
         },
       ],
       conditions: [
         {
           type: 'frontmost_application_if',
           bundle_identifiers: [
-            '.*Slack.*',
-            '.*Teams.*',
-            '.*Outlook.*',
-            '.*Telegram.*',
+            '^com\\.microsoft\\.Outlook$',
             '^com\\.apple\\.Notes$',
-            '^com\\.google\\.Chrome$',
-            '^com\\.brave\\.Browser$',
           ],
         },
       ],

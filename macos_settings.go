@@ -108,6 +108,18 @@ func macOSSettingGroups() []settingGroup {
 			},
 		},
 		{
+			name: "Accessibility",
+			settings: []setting{
+				{
+					explanation: "Turns on reduce motion, so switching spaces and opening windows fade instead of slide.",
+					commands: []string{
+						"defaults write com.apple.universalaccess reduceMotion -bool true",
+						"defaults write com.apple.Accessibility ReduceMotionEnabled -int 1",
+					},
+				},
+			},
+		},
+		{
 			name: "Finder",
 			settings: []setting{
 				{

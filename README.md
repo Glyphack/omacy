@@ -222,18 +222,18 @@ When a device is plugged in or removed, the first connected one from each list b
 List apps to start when Hammerspoon starts in `~/.hammerspoon/init.lua`:
 
 ```lua
-omacy.autostart.launch({ "Todoist", "Raycast" })
+omacy.autostart.launch({ "com.todoist.mac.Todoist", "com.raycast.macos" })
 ```
-
-Each app that is not running yet is started in the background and hidden a moment later. Use the app names as shown in Activity Monitor.
+Use bundle IDs. `osascript -e 'id of app "Todoist"'` prints the bundle ID of an app.
+Each app that is not running yet is started in the background and hidden a moment later.
 
 ### Fish
 
 A set of fish functions ship with the default fish config.
 
-`,cp` to copy any file within the terminal to clipboard. You can copy from the terminal then you can paste it to the browser.
-`,pf` paste the file that you have copied into current directory. It also works with screenshots saved into clipboard.
-`ntfy` a command to send a push notification to yourself using [ntfy](https://docs.ntfy.sh). `ntfy 10min cool!`.
+- `,cp` to copy any file within the terminal to clipboard. You can copy from the terminal then you can paste it to the browser.
+- `,pf` paste the file that you have copied into current directory. It also works with screenshots saved into clipboard.
+- `ntfy` a command to send a push notification to yourself using [ntfy](https://docs.ntfy.sh). `ntfy 10min cool!`.
 
 ### Wezterm
 

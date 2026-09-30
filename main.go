@@ -212,6 +212,7 @@ func logStyles() *log.Styles {
 
 func main() {
 	installAppsOnly := flag.Bool("installAppsOnly", false, "Only install apps without configuration")
+	configOnly := flag.Bool("configOnly", false, "Only configure apps")
 	verbose := flag.Bool("verbose", false, "Print every step as it runs instead of showing a spinner")
 	flag.Parse()
 	Verbose = *verbose
@@ -261,24 +262,26 @@ func main() {
 		exit()
 	}
 
-	if err := becomeSudo(ctx, "Enter your password:"); err != nil {
-		h.Error("Could not become sudo user.", "err", err)
-		exit()
-	}
+	if !*configOnly {
+		if err := becomeSudo(ctx, "Enter your password:"); err != nil {
+			h.Error("Could not become sudo user.", "err", err)
+			exit()
+		}
 
-	if err := runStep(ctx, "Installing Homebrew", installBrew); err != nil {
-		h.Error("Installing Homebrew failed", "err", err)
-		exit()
-	}
+		if err := runStep(ctx, "Installing Homebrew", installBrew); err != nil {
+			h.Error("Installing Homebrew failed", "err", err)
+			exit()
+		}
 
-	if err := runStep(ctx, "Installing applications", installBundle); err != nil {
-		h.Error("Installing applications failed", "err", err)
-		exit()
-	}
+		if err := runStep(ctx, "Installing applications", installBundle); err != nil {
+			h.Error("Installing applications failed", "err", err)
+			exit()
+		}
 
-	if err := runStep(ctx, "Mise Configure & Install", setupMise); err != nil {
-		h.Error("Configuring mise failed", "err", err)
-		exit()
+		if err := runStep(ctx, "Mise Configure & Install", setupMise); err != nil {
+			h.Error("Configuring mise failed", "err", err)
+			exit()
+		}
 	}
 
 	if *installAppsOnly {

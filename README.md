@@ -65,11 +65,12 @@ Raycast is a nice tool but it's not configurable from the command line. It's ins
 
 Suggested hotkeys to set:
 
-- Clipboard history
-- Raycast notes
+- [Clipboard history](https://manual.raycast.com/clipboard-history)
+- [Notes](https://manual.raycast.com/notes)
+- [Commands](https://manual.raycast.com/script-commands)
 
-These two features are so well designed that I prefer using the tool just for these.
-I also use it to open asks given the unusable state of MacOS's Spotlight.
+These features are so well designed that makes using Raycast worth it even if all you use are these.
+I also use it to open apps given the unusable state of MacOS's Spotlight.
 
 ## Mac Settings
 

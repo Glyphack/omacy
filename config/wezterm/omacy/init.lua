@@ -1,3 +1,5 @@
+-- This file belongs to omacy and is written again on every update.
+
 local wezterm = require("wezterm")
 
 local M = {}
@@ -26,8 +28,16 @@ local function follow_system_appearance(config)
 	config.color_scheme = "flexoki-light"
 end
 
+local function use_hack_font(config)
+	if config.font then
+		return
+	end
+	config.font = wezterm.font("Hack Nerd Font Mono")
+end
+
 function M.apply_to_config(config)
 	follow_system_appearance(config)
+	use_hack_font(config)
 
 	config.keys = config.keys or {}
 	table.insert(config.keys, {

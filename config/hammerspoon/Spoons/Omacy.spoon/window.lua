@@ -78,6 +78,10 @@ local function followWindow(win)
 	hs.mouse.absolutePosition(win:frame().center)
 end
 
+function window.grid()
+	hs.grid.show()
+end
+
 -- Moves the focused window to the next screen, keeping its relative size and
 -- position. Screens wrap around, so the last screen leads back to the first.
 -- Focus and the mouse pointer go with the window.
@@ -86,9 +90,7 @@ function window.nextScreen()
 	if not win then
 		return
 	end
-	withUndo(win, "nextScreen", function()
-		win:moveToScreen(win:screen():next(), true, true)
-	end)
+	win:moveToScreen(win:screen():next(), true, true)
 	followWindow(win)
 end
 
@@ -97,9 +99,7 @@ function window.previousScreen()
 	if not win then
 		return
 	end
-	withUndo(win, "previousScreen", function()
-		win:moveToScreen(win:screen():previous(), true, true)
-	end)
+	win:moveToScreen(win:screen():previous(), true, true)
 	followWindow(win)
 end
 

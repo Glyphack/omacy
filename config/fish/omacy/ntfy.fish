@@ -4,6 +4,11 @@ function ntfy
         return 1
     end
 
+    if not set -q ntfy
+        echo "ntfy: set your topic first with: set -U ntfy <topic>"
+        return 1
+    end
+
     set delay $argv[1]
     set message $argv[2]
 

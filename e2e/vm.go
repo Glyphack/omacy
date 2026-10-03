@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -47,13 +48,22 @@ func writeAskpass() error {
 }
 
 // boot starts the VM in the background, so it outlives this program, and waits until it takes ssh logins.
+// What tart run prints goes to a log file, which is shown when the VM never gets an address.
 func (vm *VM) boot(window bool) error {
 	args := []string{"run", vm.Name}
 	if !window {
 		args = append(args, "--no-graphics")
 	}
+	logPath := filepath.Join(os.TempDir(), "omacy-e2e-"+vm.Name+".log")
+	logFile, err := os.Create(logPath)
+	if err != nil {
+		return fmt.Errorf("create the tart run log: %w", err)
+	}
+	defer func() { _ = logFile.Close() }()
+
 	fmt.Printf("booting %s\n", vm.Name)
 	cmd := exec.Command("tart", args...)
+	cmd.Stdout, cmd.Stderr = logFile, logFile
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("tart run: %w", err)
@@ -64,7 +74,8 @@ func (vm *VM) boot(window bool) error {
 
 	ip, err := tart("ip", "--wait", "120", vm.Name)
 	if err != nil {
-		return err
+		printed, _ := os.ReadFile(logPath)
+		return fmt.Errorf("%w\ntart run printed:\n%s", err, strings.TrimSpace(string(printed)))
 	}
 	vm.IP = ip
 	deadline := time.Now().Add(sshWait)
@@ -79,11 +90,19 @@ func (vm *VM) boot(window bool) error {
 }
 
 // deleteVM removes the VM, stopping it first. A VM that is not there is fine.
-func deleteVM(name string) {
-	_, _ = tart("stop", name)
-	if _, err := tart("delete", name); err == nil {
-		fmt.Printf("deleted %s\n", name)
+func deleteVM(name string) error {
+	if _, err := tart("get", name); err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return err
+		}
+		return nil
 	}
+	_, _ = tart("stop", name)
+	if _, err := tart("delete", name); err != nil {
+		return err
+	}
+	fmt.Printf("deleted %s\n", name)
+	return nil
 }
 
 func (vm VM) sshCmd(command ...string) *exec.Cmd {
@@ -126,7 +145,7 @@ func (vm VM) copy(local, remote string) error {
 func tart(args ...string) (string, error) {
 	out, err := exec.Command("tart", args...).CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("tart %s: %s", strings.Join(args, " "), strings.TrimSpace(string(out)))
+		return "", fmt.Errorf("tart %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(out)))
 	}
 	return strings.TrimSpace(string(out)), nil
 }

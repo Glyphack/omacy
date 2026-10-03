@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -43,8 +44,7 @@ func main() {
 	case "ssh":
 		err = ssh(args)
 	case "clean":
-		deleteVM(devVMName)
-		deleteVM(baseVMName)
+		err = errors.Join(deleteVM(devVMName), deleteVM(baseVMName))
 	default:
 		fmt.Fprint(os.Stderr, usage)
 		os.Exit(2)
@@ -80,11 +80,19 @@ func run(window bool, omacyArgs []string) error {
 	return vm.runOmacy(omacyArgs)
 }
 
-// buildBase makes the VM that run clones from and shuts it down so its disk can be copied.
+// buildBase makes the VM that run clones from and shuts it down so its disk can be copied. A base
+// that fails half way is deleted, so run does not clone it.
 func buildBase(window bool) error {
 	if err := build(); err != nil {
 		return err
 	}
+	if err := makeBase(window); err != nil {
+		return errors.Join(err, deleteVM(baseVMName))
+	}
+	return nil
+}
+
+func makeBase(window bool) error {
 	vm, err := startVM(baseVMName, image, window)
 	if err != nil {
 		return err
@@ -92,7 +100,7 @@ func buildBase(window bool) error {
 	if err := vm.configure(); err != nil {
 		return err
 	}
-	runErr := vm.runOmacy([]string{"-installAppsOnly"})
+	runErr := vm.runOmacy([]string{"--profile=install-apps", "--no-interactive"})
 	if err := tartRun("stop", "--timeout", "120", vm.Name); err != nil {
 		return err
 	}
@@ -109,8 +117,10 @@ func ssh(command []string) error {
 
 // startVM makes a fresh VM called name from source and boots it. A VM with that name is replaced.
 func startVM(name, source string, window bool) (VM, error) {
-	deleteVM(name)
 	vm := VM{Name: name}
+	if err := deleteVM(name); err != nil {
+		return vm, err
+	}
 	fmt.Printf("cloning %s into %s\n", source, name)
 	if err := tartRun("clone", source, name); err != nil {
 		return vm, err
@@ -125,7 +135,10 @@ func startVM(name, source string, window bool) (VM, error) {
 func (vm VM) configure() error {
 	file := "/etc/sudoers.d/no-password"
 	rule := "Defaults:" + user + " !authenticate"
-	return vm.shell(fmt.Sprintf("echo '%s' | sudo -n tee %s >/dev/null && sudo -n chmod 0440 %s", rule, file, file))
+	if err := vm.shell(fmt.Sprintf("echo '%s' | sudo -n tee %s >/dev/null && sudo -n chmod 0440 %s", rule, file, file)); err != nil {
+		return fmt.Errorf("let sudo pass without a password in %s: %w", vm.Name, err)
+	}
+	return nil
 }
 
 // runOmacy copies the built binary into the VM and starts it there with this terminal attached.
@@ -133,7 +146,10 @@ func (vm VM) runOmacy(args []string) error {
 	if err := vm.copy(binary, "omacy"); err != nil {
 		return err
 	}
-	return vm.shell(append([]string{"./omacy"}, args...)...)
+	if err := vm.shell(append([]string{"./omacy"}, args...)...); err != nil {
+		return fmt.Errorf("run omacy in %s: %w", vm.Name, err)
+	}
+	return nil
 }
 
 const binary = "bin/omacy"
@@ -142,7 +158,7 @@ const binary = "bin/omacy"
 func build() error {
 	fmt.Printf("building %s\n", binary)
 	cmd := exec.Command("go", "build", "-o", binary, ".")
-	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
+	cmd.Env = append(os.Environ(), "CGO_ENABLED=0", "GOOS=darwin", "GOARCH=arm64")
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("build omacy: %w", err)

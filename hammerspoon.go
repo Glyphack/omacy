@@ -110,18 +110,20 @@ func runHammerspoonLua(ctx context.Context, lua string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-func checkHammerspoonPermission(ctx context.Context) (permissionStatus, error) {
+// hammerspoonPermission restarts Hammerspoon, so it runs the config omacy wrote and sees permissions
+// given since it last started, and then asks it whether it has accessibility access.
+func hammerspoonPermission(ctx context.Context) (bool, error) {
+	if err := restartHammerspoon(ctx); err != nil {
+		return false, err
+	}
 	out, err := runHammerspoonLua(ctx, "print(hs.accessibilityState())")
 	if err != nil {
-		return permissionUnknown, err
+		return false, err
 	}
-	if out == "true" {
-		return permissionGranted, nil
+	if out != "true" && out != "false" {
+		return false, fmt.Errorf("hammerspoon answered %q, which is neither true nor false", out)
 	}
-	if out == "false" {
-		return permissionDenied, nil
-	}
-	return permissionUnknown, fmt.Errorf("hammerspoon answered %q, which is neither true nor false", out)
+	return out == "true", nil
 }
 
 func enableHammerspoonLibrary() error {
@@ -184,7 +186,7 @@ func restartHammerspoon(ctx context.Context) error {
 		}
 
 		if errors.Is(err, errHammerspoonNotRunning) {
-			return fmt.Errorf("Cannot launch Hammerspoon. Open it yourself.")
+			return errors.New("cannot launch Hammerspoon, open it yourself")
 		}
 
 		if time.Now().After(deadline) {

@@ -13,14 +13,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type permissionStatus int
-
-const (
-	permissionUnknown permissionStatus = iota
-	permissionGranted
-	permissionDenied
-)
-
 func pathMissing(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {

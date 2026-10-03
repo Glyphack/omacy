@@ -450,26 +450,23 @@ func (a *karabinerApp) selectProfile(ctx context.Context, name string) error {
 	return err
 }
 
-func karabinerPermission(ctx context.Context) (permissionStatus, error) {
+func karabinerPermission(ctx context.Context) (bool, error) {
 	out, err := runKarabiner(ctx, "--show-settings-window-guidance")
 	if err != nil {
-		return permissionUnknown, err
+		return false, err
 	}
 	var g karabinerGuidance
 	if err := json.Unmarshal([]byte(out), &g); err != nil {
-		return permissionUnknown, fmt.Errorf("cannot read what %s said about its permissions: %w", karabinerCLIName, err)
+		return false, fmt.Errorf("cannot read what %s said about its permissions: %w", karabinerCLIName, err)
 	}
 	state := g.CoreServiceDaemonState
 	permission := state.BundlePermissionCheckResult
-	if g.CurrentAlert == "none" &&
+	return g.CurrentAlert == "none" &&
 		g.CurrentSetup == "none" &&
 		state.DriverActivated &&
 		state.DriverConnected &&
 		permission.AccessibilityProcessTrusted &&
-		permission.IOHIDListenEventAllowed {
-		return permissionGranted, nil
-	}
-	return permissionDenied, nil
+		permission.IOHIDListenEventAllowed, nil
 }
 
 func setupKarabiner(ctx context.Context) error {

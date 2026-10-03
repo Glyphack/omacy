@@ -18,8 +18,9 @@ const (
 	// minAppsWidth is the narrowest the apps zone gets before the macOS zone moves under it.
 	minAppsWidth = 40
 	maxAppsWidth = 80
-	// headerLines is the tab row, the line under the active tab and a blank line.
-	headerLines   = 3
+	// headerLines is the tab row, the line under the active tab, a blank line, the install button
+	// and a blank line.
+	headerLines   = 5
 	helpLines     = 2
 	optionIndent  = len("> [x] ")
 	settingIndent = len("    > [x] ")
@@ -29,7 +30,7 @@ const (
 )
 
 type formStyles struct {
-	tab, activeTab, zone, group, cursor, tick, partial, changed, note, help, hint, question, rule lipgloss.Style
+	tab, activeTab, button, activeButton, zone, group, cursor, tick, partial, changed, note, help, hint, question, rule lipgloss.Style
 }
 
 func newFormStyles(dark bool) formStyles {
@@ -38,20 +39,24 @@ func newFormStyles(dark bool) formStyles {
 	green := ld(lipgloss.Color("#1E8A3A"), lipgloss.Color("#5FD787"))
 	yellow := ld(lipgloss.Color("#A15C00"), lipgloss.Color("#FFD75F"))
 	faint := ld(lipgloss.Color("#767676"), lipgloss.Color("#8A8A8A"))
+	buttonText := ld(lipgloss.Color("#FFFFFF"), lipgloss.Color("#000000"))
+	button := lipgloss.NewStyle().Foreground(buttonText).Bold(true).Padding(0, 3)
 	return formStyles{
-		tab:       lipgloss.NewStyle().Foreground(faint),
-		activeTab: lipgloss.NewStyle().Foreground(accent).Bold(true),
-		zone:      lipgloss.NewStyle().Foreground(accent).Bold(true),
-		group:     lipgloss.NewStyle().Bold(true),
-		cursor:    lipgloss.NewStyle().Foreground(accent).Bold(true),
-		tick:      lipgloss.NewStyle().Foreground(green),
-		partial:   lipgloss.NewStyle().Foreground(yellow),
-		changed:   lipgloss.NewStyle().Foreground(yellow).Bold(true),
-		note:      lipgloss.NewStyle().Foreground(faint),
-		help:      lipgloss.NewStyle().Italic(true),
-		hint:      lipgloss.NewStyle().Foreground(faint),
-		question:  lipgloss.NewStyle().Foreground(accent).Bold(true),
-		rule:      lipgloss.NewStyle().Foreground(faint),
+		tab:          lipgloss.NewStyle().Foreground(faint),
+		activeTab:    lipgloss.NewStyle().Foreground(accent).Bold(true),
+		button:       button.Background(accent),
+		activeButton: button.Background(green),
+		zone:         lipgloss.NewStyle().Foreground(accent).Bold(true),
+		group:        lipgloss.NewStyle().Bold(true),
+		cursor:       lipgloss.NewStyle().Foreground(accent).Bold(true),
+		tick:         lipgloss.NewStyle().Foreground(green),
+		partial:      lipgloss.NewStyle().Foreground(yellow),
+		changed:      lipgloss.NewStyle().Foreground(yellow).Bold(true),
+		note:         lipgloss.NewStyle().Foreground(faint),
+		help:         lipgloss.NewStyle().Italic(true),
+		hint:         lipgloss.NewStyle().Foreground(faint),
+		question:     lipgloss.NewStyle().Foreground(accent).Bold(true),
+		rule:         lipgloss.NewStyle().Foreground(faint),
 	}
 }
 
@@ -86,12 +91,19 @@ type zone int
 const (
 	appsZone zone = iota
 	macZone
+	buttonZone
 )
 
 // place is one row of the form. option is -1 on the line of a macOS group.
 type place struct{ group, option int }
 
+// installButton is the row of the install button between the tabs and the two zones.
+var installButton = place{noGroup, noGroup}
+
 func (p place) zone() zone {
+	if p == installButton {
+		return buttonZone
+	}
 	if p.group < appGroups {
 		return appsZone
 	}
@@ -121,7 +133,7 @@ type configForm struct {
 }
 
 func newConfigForm(args arguments, styles formStyles) *configForm {
-	m := &configForm{args: args, styles: styles, open: noGroup}
+	m := &configForm{args: args, styles: styles, open: noGroup, cursor: installButton}
 	m.fill(args.profile)
 	return m
 }
@@ -180,7 +192,7 @@ func (m *configForm) tickGroup(g int) {
 }
 
 func (m *configForm) rows() []place {
-	var rows []place
+	rows := []place{installButton}
 	for g, group := range m.groups {
 		if g >= appGroups {
 			rows = append(rows, place{g, -1})
@@ -241,14 +253,25 @@ func (m *configForm) press(k string) {
 	case "l", "right":
 		m.jump(macZone)
 	case "space", "x":
+		if m.cursor == installButton {
+			return
+		}
 		if m.cursor.isGroupLine() {
 			m.tickGroup(m.cursor.group)
 			return
 		}
 		m.option(m.cursor).on = !m.option(m.cursor).on
 	case "a":
+		if m.cursor == installButton {
+			return
+		}
 		m.tickGroup(m.cursor.group)
 	case "enter":
+		if m.cursor == installButton {
+			m.start = true
+			m.done = true
+			return
+		}
 		if !m.cursor.isGroupLine() {
 			m.ask = askStart
 			return
@@ -367,16 +390,32 @@ type layout struct {
 }
 
 func (m *configForm) layout() layout {
+	widths := m.paneWidths()
+	if len(widths) == 2 {
+		return layout{[]pane{m.appsPane(widths[0]), m.macPane(widths[1])}, widths}
+	}
+	p := m.appsPane(widths[0])
+	p.add("")
+	p.join(m.macPane(widths[0]))
+	return layout{[]pane{p}, widths}
+}
+
+func (m *configForm) paneWidths() []int {
 	macWidth := m.macWidth()
 	if m.width >= minAppsWidth+zoneGap+macWidth {
-		appsWidth := min(m.width-zoneGap-macWidth, maxAppsWidth)
-		return layout{[]pane{m.appsPane(appsWidth), m.macPane(macWidth)}, []int{appsWidth, macWidth}}
+		return []int{min(m.width-zoneGap-macWidth, maxAppsWidth), macWidth}
 	}
-	width := min(m.width, maxAppsWidth)
-	p := m.appsPane(width)
-	p.add("")
-	p.join(m.macPane(width))
-	return layout{[]pane{p}, []int{width}}
+	return []int{min(m.width, maxAppsWidth)}
+}
+
+// formWidth is the width of the column the whole form sits in, in the middle of the terminal.
+func (m *configForm) formWidth() int {
+	widths := m.paneWidths()
+	width := zoneGap * (len(widths) - 1)
+	for _, w := range widths {
+		width += w
+	}
+	return width
 }
 
 // macWidth is the width of the macOS zone, wide enough for every group with its settings open.
@@ -513,7 +552,7 @@ func (m *configForm) hints() []string {
 	var lines []string
 	line := ""
 	for _, item := range items {
-		if line != "" && lipgloss.Width(line+"  "+item) > m.width {
+		if line != "" && lipgloss.Width(line+"  "+item) > m.formWidth() {
 			lines = append(lines, line)
 			line = ""
 		}
@@ -546,6 +585,14 @@ func (m *configForm) tabRow() (string, string) {
 	return strings.TrimRight(row, " "), strings.TrimRight(under, " ")
 }
 
+func (m *configForm) installLine() string {
+	mark, style := "  ", m.styles.button
+	if m.cursor == installButton {
+		mark, style = m.styles.cursor.Render(">")+" ", m.styles.activeButton
+	}
+	return mark + style.Render("Install")
+}
+
 func (m *configForm) body(l layout) []string {
 	var lines []string
 	for r := range m.bodyHeight() {
@@ -575,7 +622,7 @@ func (m *configForm) rule(l layout) string {
 	if below {
 		text += "── more below "
 	}
-	return m.styles.rule.Render(text + strings.Repeat("─", max(m.width-lipgloss.Width(text), 0)))
+	return m.styles.rule.Render(text + strings.Repeat("─", max(m.formWidth()-lipgloss.Width(text), 0)))
 }
 
 // help gives the flag for app options, since their help is already shown in the apps zone.
@@ -588,6 +635,8 @@ func (m *configForm) help() string {
 	}
 	p := m.cursor
 	switch {
+	case p == installButton:
+		return m.styles.help.Render("Press enter to start the setup with everything that is ticked.")
 	case p.isGroupLine():
 		on, total := m.count(p.group)
 		action := "enter shows them"
@@ -608,19 +657,27 @@ func (m *configForm) View() tea.View {
 	if m.done || m.width == 0 {
 		return v
 	}
-	clip := lipgloss.NewStyle().MaxWidth(m.width)
+	width := m.formWidth()
+	center := func(s string) []string {
+		return strings.Split(lipgloss.PlaceHorizontal(width, lipgloss.Center, s), "\n")
+	}
 	l := m.layout()
 	tabs, under := m.tabRow()
-	lines := []string{clip.Render(tabs), clip.Render(under), ""}
-	for _, line := range m.body(l) {
-		lines = append(lines, clip.Render(line))
-	}
-	lines = append(lines,
-		m.rule(l),
-		lipgloss.NewStyle().Width(m.width).Height(helpLines).MaxHeight(helpLines).Render(m.help()),
-	)
+	lines := center(tabs + "\n" + under)
+	lines = append(lines, "")
+	lines = append(lines, center(m.installLine())...)
+	lines = append(lines, "")
+	lines = append(lines, m.body(l)...)
+	lines = append(lines, m.rule(l))
+	help := lipgloss.NewStyle().Width(width).Height(helpLines).MaxHeight(helpLines).Render(m.help())
+	lines = append(lines, strings.Split(help, "\n")...)
 	for _, line := range m.hints() {
-		lines = append(lines, clip.Render(m.styles.hint.Render(line)))
+		lines = append(lines, center(m.styles.hint.Render(line))...)
+	}
+	clip := lipgloss.NewStyle().MaxWidth(width)
+	margin := strings.Repeat(" ", (m.width-width)/2)
+	for i, line := range lines {
+		lines[i] = margin + clip.Render(line)
 	}
 	v.SetContent(strings.Join(lines[:min(len(lines), m.height)], "\n"))
 	return v

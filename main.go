@@ -16,8 +16,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/cirruslabs/echelon"
-	"github.com/cirruslabs/echelon/renderers"
 )
 
 var HomeDir string
@@ -30,21 +28,13 @@ var LogFile *os.File
 
 func runStep(ctx context.Context, title string, action func(context.Context) error) error {
 	slog.Info(title)
-	if Verbose {
-		return action(ctx)
-	}
-
-	renderer := renderers.NewInteractiveRenderer(os.Stdout, nil)
-	go renderer.StartDrawing()
-	root := echelon.NewLogger(echelon.InfoLevel, renderer)
-	step := root.Scoped(title)
-
 	err := action(ctx)
-
-	step.Finish(err == nil)
-	root.Finish(err == nil)
-	renderer.StopDrawing()
-	return err
+	if err != nil {
+		fmt.Println("Failed: " + title)
+		return err
+	}
+	fmt.Println("Done: " + title)
+	return nil
 }
 
 func mustRunStep(ctx context.Context, title string, action func(context.Context) error) {

@@ -48,20 +48,20 @@ type optionGroup struct {
 func newConfig() Config {
 	return Config{
 		install: installChoices{
-			brew: option{flag: "brew", title: "Homebrew apps", help: "Installs Homebrew and the apps the rest of the setup needs, like WezTerm, Karabiner and Hammerspoon. Also adds Brave, Raycast, Zed and IINA."},
-			mise: option{flag: "mise", title: "mise tools", help: "Installs developer tools like fzf, ripgrep and Go with mise. Add a tool to the mise config and every Mac you set up gets it."},
+			brew: option{flag: "brew", title: "apps", help: "Installs Homebrew and the apps the rest of the setup needs: Brave Browser, Karabiner, Hammerspoon, WezTerm, Raycast, Zed, and IINA. You can later add your app choices there too."},
+			mise: option{flag: "mise", title: "developer tools", help: "Installs developer tools like fzf, ripgrep and Go with mise. You can later add your own tools too."},
 		},
 		configure: configureChoices{
-			defaultShell: option{flag: "default-shell", title: "Fish as login shell", help: "Makes fish the shell every new terminal opens. fish suggests commands as you type and completes them with tab, with no plugins."},
-			fish:         option{flag: "fish", title: "Fish config", help: "Adds a prompt with the folder and git branch, and fzf search through past commands. Also adds ,cp and ,pf to copy and paste files, and ntfy to send a notification to your phone."},
-			wezterm:      option{flag: "wezterm", title: "WezTerm config", help: "Gives WezTerm colors that follow light and dark mode, the Hack Nerd Font, and cmd+shift+c to copy the output of the last command. You turn it on with one line in wezterm.lua."},
+			defaultShell: option{flag: "default-shell", title: "Fish as login shell", help: "Super productive shell with autocompletion."},
+			fish:         option{flag: "fish", title: "Fish config", help: "Setup your prompt, and fzf search. And creates default functions "},
+			wezterm:      option{flag: "wezterm", title: "WezTerm config", help: "WezTerm follows system appearance for light/dark mode, the Hack Nerd Font, and cmd+shift+c to copy the output of the last command."},
 			karabiner: appWithPermissions{
-				config:          option{flag: "karabiner", title: "Karabiner config", help: "Caps Lock becomes Escape when you tap it and Hyper (cmd+ctrl+option) when you hold it, a key no app uses. cmd+shift+v pastes with no formatting in Notes and Outlook."},
-				permissionSetup: option{flag: "karabiner-permissions", title: "Karabiner permissions", help: "Opens Karabiner and waits while you allow its keyboard driver and input monitoring. Without them the Caps Lock and paste keys do nothing."},
+				config:          option{flag: "karabiner", title: "Karabiner config", help: "Caps Lock becomes Escape when you tap it and Hyper key when you hold it. cmd+shift+v pastes with no formatting."},
+				permissionSetup: option{flag: "karabiner-permissions", title: "Karabiner permissions", help: "Guide you through granting permissions to Karabiner"},
 			},
 			hammerspoon: appWithPermissions{
-				config:          option{flag: "hammerspoon", title: "Hammerspoon config", help: "Hold Caps Lock and press a key to snap windows to half the screen, move them between screens or open Brave and WezTerm. It also adds a window picker, a bookmark picker and a mic mute key."},
-				permissionSetup: option{flag: "hammerspoon-permissions", title: "Hammerspoon permissions", help: "Opens the accessibility settings and waits while you turn Hammerspoon on. Without it the window shortcuts cannot move windows."},
+				config:          option{flag: "hammerspoon", title: "Hammerspoon config", help: "Contains various mac automations and customizations."},
+				permissionSetup: option{flag: "hammerspoon-permissions", title: "Hammerspoon permissions", help: "Guide you through granting permissions to Hammerspoon"},
 			},
 		},
 		macOS: macOSSettingGroups(),
@@ -125,6 +125,8 @@ var configProfiles = []configProfile{
 		currentMacProfile(c)
 		c.install.brew.on = false
 		c.install.mise.on = false
+		c.configure.hammerspoon.permissionSetup.on = false
+		c.configure.karabiner.permissionSetup.on = false
 	}},
 }
 

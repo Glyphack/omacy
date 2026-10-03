@@ -12,7 +12,6 @@ func macOSSettingGroups() settingGroups {
 				{
 					option:   option{flag: "macos-no-wake-on-network", title: "No wake for network", help: "Keeps the mac asleep even when network traffic arrives for it."},
 					commands: []string{"sudo systemsetup -setwakeonnetworkaccess off"},
-					optional: true,
 				},
 			},
 		},
@@ -87,7 +86,6 @@ func macOSSettingGroups() settingGroups {
 						`plutil -replace FK_StandardViewSettings.ListViewSettings.sortColumn -string dateModified "$HOME/Library/Preferences/com.apple.finder.plist"`,
 						`plutil -replace FK_StandardViewSettings.ExtendedListViewSettingsV2.sortColumn -string dateModified "$HOME/Library/Preferences/com.apple.finder.plist"`,
 					},
-					optional: true,
 				},
 				{
 					option:   option{flag: "macos-finder-quit", title: "Quit with command q", help: "Lets you quit Finder with command q, which also hides the icons on the desktop."},
@@ -258,7 +256,6 @@ func macOSSettingGroups() settingGroups {
 						"duti -s com.colliderli.iina public.mpeg-4 all",
 						"duti -s com.colliderli.iina .mkv all",
 					},
-					optional: true,
 				},
 			},
 		},

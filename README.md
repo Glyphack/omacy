@@ -93,7 +93,7 @@ Security
 - Turns the firewall on, so only apps you allow can accept connections from outside.
 - Turns on stealth mode, so the mac stays silent when someone pings it and does not show up in network scans.
 - Stops other macs from sending AppleScript commands to this one (remote Apple events).
-- Stops the mac from waking up when network traffic arrives for it. Marked optional.
+- Stops the mac from waking up when network traffic arrives for it.
 - Removes the guest user from the login screen.
 
 Menu bar
@@ -124,7 +124,7 @@ Accessibility
 Finder
 - Shows file extensions.
 - Sorts folders above files in every list.
-- Sorts lists by the date a file was last changed. Marked optional.
+- Sorts lists by the date a file was last changed.
 - Lets you quit Finder with command q, which also hides the desktop icons.
 - Removes window and get info animations.
 - Opens every new window in your home directory.
@@ -141,7 +141,7 @@ Finder
 - Expands the general, open with and permissions sections of the get info window.
 
 Default apps
-- Makes IINA the default app for video files. Marked optional.
+- Makes IINA the default app for video files.
 
 
 ## Usage

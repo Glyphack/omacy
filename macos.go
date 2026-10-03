@@ -11,8 +11,6 @@ import (
 type setting struct {
 	option
 	commands []string
-	// optional ignores failures, for commands that fail when there is nothing to change.
-	optional bool
 }
 
 type settingGroup struct {
@@ -45,7 +43,7 @@ func (s setting) apply(ctx context.Context) []settingFailure {
 	var failures []settingFailure
 	for _, line := range s.commands {
 		out, err := run(exec.CommandContext(ctx, "sh", "-c", line))
-		if err == nil || s.optional {
+		if err == nil {
 			continue
 		}
 		failures = append(failures, settingFailure{

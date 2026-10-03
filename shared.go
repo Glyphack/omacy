@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"errors"
 	"fmt"
@@ -108,4 +109,41 @@ func replaceDir(staging, target string) error {
 		return fmt.Errorf("cannot swap %s into %s: %v", staging, target, err)
 	}
 	return nil
+}
+
+type permissionRequest struct {
+	app         string
+	appPath     string
+	wait        bool
+	check       func(context.Context) (bool, error)
+	openArgs    []string
+	openMessage string
+	doneMessage string
+}
+
+func (p permissionRequest) ask(ctx context.Context) {
+	if _, err := os.Stat(p.appPath); err != nil {
+		slog.Info(p.app+" is not installed, skipped checking its permissions", "path", p.appPath)
+		fmt.Println(p.app + " is not installed, skipped checking its permissions")
+		return
+	}
+
+	granted, err := p.check(ctx)
+	if !granted && p.wait {
+		pause(p.openMessage)
+		runOpen(ctx, p.openArgs...)
+		pause(p.doneMessage)
+		granted, err = p.check(ctx)
+	}
+
+	if granted {
+		slog.Info(p.app + " permissions are granted")
+		fmt.Println(p.app + " permissions are granted")
+		return
+	}
+	if err != nil {
+		slog.Warn("Cannot ask "+p.app+" about its permissions", "err", err)
+	}
+	slog.Warn(p.app + " permissions are not granted")
+	fmt.Printf("%s permissions are not granted. Open %s and give them later yourself.\n", p.app, p.app)
 }

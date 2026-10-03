@@ -25,6 +25,7 @@ const (
 	karabinerRuleDir            = "config/karabiner"
 	defaultKarabinerProfileName = "Default profile"
 	karabinerCLIName            = "karabiner_cli"
+	karabinerAppPath            = "/Applications/Karabiner-Elements.app"
 
 	karabinerCallTimeout = 5 * time.Second
 )
@@ -392,8 +393,7 @@ func runKarabiner(ctx context.Context, args ...string) (string, error) {
 		return "", fmt.Errorf("%s timed out %s", asked, karabinerCallTimeout)
 	}
 	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
+		if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 			return "", fmt.Errorf("%s failed: %w: %s", asked, err, strings.TrimSpace(string(exitErr.Stderr)))
 		}
 		return "", err

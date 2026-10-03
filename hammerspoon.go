@@ -95,8 +95,7 @@ func runHammerspoonLua(ctx context.Context, lua string) (string, error) {
 		return "", fmt.Errorf("%s gave no answer within %s", hsCLI, hsCallTimeout)
 	}
 	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
+		if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
 			switch exitErr.ExitCode() {
 			case 75:
 				return "", errHammerspoonNotRunning

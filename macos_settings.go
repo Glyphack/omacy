@@ -50,12 +50,8 @@ func macOSSettingGroups() settingGroups {
 			name: "Screen",
 			settings: []setting{
 				{
-					option: option{flag: "macos-screenshots", title: "Screenshots as png on desktop", help: "Saves new screenshots on the desktop as png files, with no shadow around the window."},
-					commands: []string{
-						`defaults write com.apple.screencapture location -string "$HOME/Desktop"`,
-						"defaults write com.apple.screencapture type -string png",
-						"defaults write com.apple.screencapture disable-shadow -bool true",
-					},
+					option:   option{flag: "macos-screenshots", title: "No shadow in screenshots", help: "Takes window screenshots with no shadow around the window."},
+					commands: []string{"defaults write com.apple.screencapture disable-shadow -bool true"},
 				},
 			},
 		},
@@ -132,22 +128,16 @@ func macOSSettingGroups() settingGroups {
 					commands: []string{"defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false"},
 				},
 				{
-					option: option{flag: "macos-finder-spring-loading", title: "Open folders on drag hover", help: "Opens a folder on its own, with no wait, when you hold a dragged file over it."},
-					commands: []string{
-						"defaults write NSGlobalDomain com.apple.springing.enabled -bool true",
-						"defaults write NSGlobalDomain com.apple.springing.delay -float 0",
-					},
+					option:   option{flag: "macos-finder-spring-loading", title: "Open folders on drag hover", help: "Opens a folder on its own, with no wait, when you hold a dragged file over it."},
+					commands: []string{"defaults write NSGlobalDomain com.apple.springing.delay -float 0"},
 				},
 				{
 					option:   option{flag: "macos-finder-no-network-ds-store", title: "No .DS_Store on network drives", help: "Stops Finder from leaving .DS_Store files on shared network drives."},
 					commands: []string{"defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true"},
 				},
 				{
-					option: option{flag: "macos-finder-open-disk-images", title: "Open mounted disk images", help: "Opens a window when a disk image is mounted."},
-					commands: []string{
-						"defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true",
-						"defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true",
-					},
+					option:   option{flag: "macos-finder-open-disk-images", title: "Open mounted disk images", help: "Opens a window when a disk image is mounted."},
+					commands: []string{"defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true"},
 				},
 				{
 					option:   option{flag: "macos-finder-list-view", title: "List view everywhere", help: "Makes the list view the one every window opens with."},
@@ -193,16 +183,8 @@ func macOSSettingGroups() settingGroups {
 					commands: []string{"defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true"},
 				},
 				{
-					option:   option{flag: "macos-dock-running-dots", title: "Dots under running apps", help: "Shows the small dot under every app that is running."},
-					commands: []string{"defaults write com.apple.dock show-process-indicators -bool true"},
-				},
-				{
 					option:   option{flag: "macos-dock-no-bounce", title: "No bounce on launch", help: "Stops the icon from bouncing while an app starts."},
 					commands: []string{"defaults write com.apple.dock launchanim -bool false"},
-				},
-				{
-					option:   option{flag: "macos-mission-control-ungroup", title: "Windows apart in Mission Control", help: "Shows each window on its own in Mission Control instead of grouping them by app."},
-					commands: []string{"defaults write com.apple.dock expose-group-apps -bool false"},
 				},
 				{
 					option: option{flag: "macos-dock-autohide", title: "Hide the dock, no delay", help: "Keeps the dock hidden and brings it back with no wait and no animation."},
@@ -217,17 +199,8 @@ func macOSSettingGroups() settingGroups {
 					commands: []string{"defaults write com.apple.dock show-recents -bool false"},
 				},
 				{
-					option: option{flag: "macos-no-hot-corners", title: "No hot corners", help: "Turns off all four hot corners, so moving the pointer to a screen corner does nothing."},
-					commands: []string{
-						"defaults write com.apple.dock wvous-tl-corner -int 1",
-						"defaults write com.apple.dock wvous-tl-modifier -int 0",
-						"defaults write com.apple.dock wvous-tr-corner -int 1",
-						"defaults write com.apple.dock wvous-tr-modifier -int 0",
-						"defaults write com.apple.dock wvous-bl-corner -int 1",
-						"defaults write com.apple.dock wvous-bl-modifier -int 0",
-						"defaults write com.apple.dock wvous-br-corner -int 1",
-						"defaults write com.apple.dock wvous-br-modifier -int 0",
-					},
+					option:   option{flag: "macos-no-hot-corners", title: "No Quick Note corner", help: "Turns off the bottom right hot corner, so moving the pointer there no longer opens Quick Note."},
+					commands: []string{"defaults write com.apple.dock wvous-br-corner -int 1"},
 				},
 			},
 		},

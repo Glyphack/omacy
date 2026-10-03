@@ -48,4 +48,16 @@ function M.apply_to_config(config)
 	})
 end
 
+local loading = false
+
+function M.load()
+	if loading then
+		return nil
+	end
+	loading = true
+	local config = dofile(wezterm.config_file)
+	M.apply_to_config(config)
+	return config
+end
+
 return M

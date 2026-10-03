@@ -10,7 +10,7 @@ function ntfy
     end
 
     set delay $argv[1]
-    set message $argv[2]
+    set message "$argv[2..-1]"
 
     curl -s -H "In: $delay" -d "$message" ntfy.sh/"$ntfy" > /dev/null
 end

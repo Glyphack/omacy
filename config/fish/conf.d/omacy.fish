@@ -10,7 +10,7 @@ if type -q mise
     mise activate fish | source
 end
 
-# Emacs-style bindings with vi-like history search on arrow keys
+# Vi-style bindings that keep the emacs-style keys in every mode
 # https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_hybrid_key_bindings.fish
 if type -q fish_hybrid_key_bindings
     fish_hybrid_key_bindings

@@ -10,15 +10,6 @@ var rule = {
           modifiers: ['command', 'shift', 'option'],
         },
       ],
-      conditions: [
-        {
-          type: 'frontmost_application_if',
-          bundle_identifiers: [
-            '^com\\.microsoft\\.Outlook$',
-            '^com\\.apple\\.Notes$',
-          ],
-        },
-      ],
     },
   ],
 }

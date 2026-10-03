@@ -144,7 +144,7 @@ func main() {
 		os.Exit(1)
 	}
 	ConfigDir = filepath.Join(HomeDir, ".config")
-	OmacyDir = filepath.Join(HomeDir, ".omacy")
+	OmacyDir = filepath.Join(ConfigDir, "omacy")
 
 	LogFile, err = openLogFile()
 	if err != nil {
@@ -252,4 +252,6 @@ func install(ctx context.Context, config Config) {
 		openMessage: "Press Enter to open the accessibility settings. Turn Hammerspoon on in that list and then come back here.",
 		doneMessage: "Press Enter once Hammerspoon is turned on in the accessibility list",
 	}.ask(ctx)
+
+	runOpen(ctx, "-a", "MonitorControl")
 }

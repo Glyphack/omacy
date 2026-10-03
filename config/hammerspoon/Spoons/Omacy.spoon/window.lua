@@ -76,6 +76,7 @@ local function followWindow(win)
 end
 
 function window.grid()
+	hs.grid.setGrid("6x3")
 	hs.grid.show()
 end
 

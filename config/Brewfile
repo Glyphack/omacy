@@ -6,10 +6,10 @@ cask "karabiner-elements"
 brew "fish"
 brew "mise"
 brew "duti"
+cask "zed"
 
 # Apps
 cask "iina"
 cask "monitorcontrol"
 cask "brave-browser"
-cask "zed"
 cask "raycast"

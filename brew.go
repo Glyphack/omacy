@@ -21,6 +21,8 @@ const (
 	brewBinary       = brewPrefix + "/bin/brew"
 )
 
+var skipOtherManagers = []string{"--no-go", "--no-cargo", "--no-uv", "--no-npm"}
+
 func installBrew(ctx context.Context) error {
 	if _, err := os.Stat(brewBinary); err == nil {
 		slog.Info("Homebrew is already installed, skipping", "prefix", brewPrefix)
@@ -44,18 +46,24 @@ func installBrew(ctx context.Context) error {
 	if _, err := os.Stat(brewBinary); err != nil {
 		return fmt.Errorf("the homebrew installer left no brew at %s: %w", brewBinary, err)
 	}
+	return addBrewToPath()
+}
+
+func addBrewToPath() error {
+	if _, err := os.Stat(brewBinary); err != nil {
+		return nil
+	}
 	if err := os.Setenv("PATH", filepath.Join(brewPrefix, "bin")+":"+os.Getenv("PATH")); err != nil {
 		return fmt.Errorf("set PATH: %w", err)
 	}
-
 	return nil
 }
 
-func brewfile() string {
+func getBrewBundleFile() string {
 	if path := os.Getenv("BREWFILE_PATH"); path != "" {
 		return path
 	}
-	return filepath.Join(omacyDir(), "Brewfile")
+	return filepath.Join(OmacyDir, "Brewfile")
 }
 
 func brewBundle(ctx context.Context, args ...string) *exec.Cmd {
@@ -66,12 +74,14 @@ func brewBundle(ctx context.Context, args ...string) *exec.Cmd {
 		"HOMEBREW_NO_INSTALL_UPGRADE=1",
 		"HOMEBREW_NO_ANALYTICS=1",
 		"HOMEBREW_NO_ENV_HINTS=1",
+		"HOMEBREW_BUNDLE_INSTALL_CLEANUP=",
+		"HOMEBREW_BUNDLE_FORCE_INSTALL_CLEANUP=",
 	)
 	return cmd
 }
 
 func installBundle(ctx context.Context) error {
-	install := brewBundle(ctx, "install", "--file=-", "--no-upgrade")
+	install := brewBundle(ctx, "install", "--file=-", "--no-upgrade", "--force")
 	install.Stdin = strings.NewReader(BrewFile)
 	out, err := run(install)
 	if err != nil {
@@ -79,7 +89,8 @@ func installBundle(ctx context.Context) error {
 	}
 	slog.Debug("brew bundle install", "stdout", out)
 
-	out, err = run(brewBundle(ctx, "dump", "--file="+brewfile(), "--force", "--no-go", "--no-cargo", "--no-uv", "--no-npm"))
+	dump := append([]string{"dump", "--file=" + getBrewBundleFile(), "--force"}, skipOtherManagers...)
+	out, err = run(brewBundle(ctx, dump...))
 	if err != nil {
 		return err
 	}
@@ -100,25 +111,29 @@ func runBrewCommand(ctx context.Context, name string) error {
 	case "edit":
 		return brewEdit()
 	case "sync":
-		return runAttached(brewBundle(ctx, "install", "--file="+brewfile(), "--force-cleanup", "--no-upgrade"))
-	case "dump":
-		if err := runAttached(brewBundle(ctx, "dump", "--file="+brewfile(), "--force")); err != nil {
+		if err := runAttached(brewBundle(ctx, "install", "--file="+getBrewBundleFile(), "--no-upgrade")); err != nil {
 			return err
 		}
-		fmt.Printf("Wrote %s\n", brewfile())
+		cleanup := append([]string{"cleanup", "--file=" + getBrewBundleFile()}, skipOtherManagers...)
+		return runAttached(brewBundle(ctx, cleanup...))
+	case "dump":
+		dump := append([]string{"dump", "--file=" + getBrewBundleFile(), "--force"}, skipOtherManagers...)
+		if err := runAttached(brewBundle(ctx, dump...)); err != nil {
+			return err
+		}
+		fmt.Printf("Wrote %s\n", getBrewBundleFile())
 		return nil
 	default:
 		return errors.New("usage: omacy brew edit|sync|dump")
 	}
 }
 
-// brewEdit opens the Brewfile in the user's editor and waits for them to finish.
 func brewEdit() error {
 	editor := strings.Fields(os.Getenv("EDITOR"))
 	if len(editor) == 0 {
-		return errors.New("set EDITOR and try again")
+		editor = []string{"nano"}
 	}
-	if err := runAttached(exec.Command(editor[0], append(editor[1:], brewfile())...)); err != nil {
+	if err := runAttached(exec.Command(editor[0], append(editor[1:], getBrewBundleFile())...)); err != nil {
 		return err
 	}
 	fmt.Println("Run omacy brew sync to install and remove packages so they match the file.")

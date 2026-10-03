@@ -26,18 +26,23 @@ path_note() {
 main() {
 	[ "$(uname -s)" = Darwin ] || die "this only runs on macOS, found $(uname -s)"
 
-	[ "$(uname -m)" = arm64 ] || die "omacy only runs on Apple silicon Macs, found $(uname -m)"
+	[ "$(id -u)" -ne 0 ] || die "run this as yourself, not as root or with sudo. omacy asks for your password when it needs it"
 
-	url="https://github.com/$REPO/releases/download/$TAG/omacy-darwin-arm64"
+	[ "$(sysctl -n hw.optional.arm64 2>/dev/null)" = 1 ] || die "omacy only runs on Apple silicon Macs"
+
+	asset="omacy-darwin-arm64"
+	url="https://github.com/$REPO/releases/download/$TAG/$asset"
 	tmp="$(mktemp -d)"
 	trap 'rm -rf "$tmp"' EXIT
 
 	echo "downloading omacy $TAG for darwin/arm64"
-	curl -fL --progress-bar -o "$tmp/omacy" "$url" || die "download failed from $url"
-	chmod +x "$tmp/omacy"
+	curl -fL --progress-bar -o "$tmp/$asset" "$url" || die "download failed from $url"
+	curl -fsSL -o "$tmp/$asset.sha256" "$url.sha256" || die "download failed from $url.sha256"
+	(cd "$tmp" && shasum -a 256 -c "$asset.sha256" >/dev/null) || die "the downloaded omacy does not match its checksum, try again"
+	chmod +x "$tmp/$asset"
 
 	mkdir -p "$INSTALL_DIR"
-	mv "$tmp/omacy" "$INSTALL_DIR/omacy"
+	mv "$tmp/$asset" "$INSTALL_DIR/omacy"
 	rm -rf "$tmp"
 	trap - EXIT
 	echo "installed $INSTALL_DIR/omacy"

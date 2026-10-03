@@ -27,7 +27,7 @@ func setupMise(ctx context.Context) error {
 		return fmt.Errorf("write mise config: %w", err)
 	}
 	slog.Debug("Wrote mise config", "file", path)
-	out, err := run(exec.CommandContext(ctx, "mise", "install"))
+	out, err := run(miseCommand(ctx, "install"))
 	if err != nil {
 		return fmt.Errorf("mise install: %w", err)
 	}
@@ -36,10 +36,16 @@ func setupMise(ctx context.Context) error {
 	return addMiseToPath(ctx)
 }
 
+func miseCommand(ctx context.Context, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, "mise", args...)
+	cmd.Dir = HomeDir
+	return cmd
+}
+
 // addMiseToPath puts the bin directories of the tools mise manages in front of PATH, so the steps
 // that follow find them the way a shell that activated mise would.
 func addMiseToPath(ctx context.Context) error {
-	out, err := run(exec.CommandContext(ctx, "mise", "bin-paths"))
+	out, err := run(miseCommand(ctx, "bin-paths"))
 	if err != nil {
 		return fmt.Errorf("mise bin-paths: %w", err)
 	}

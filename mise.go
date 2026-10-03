@@ -42,8 +42,7 @@ func miseCommand(ctx context.Context, args ...string) *exec.Cmd {
 	return cmd
 }
 
-// addMiseToPath puts the bin directories of the tools mise manages in front of PATH, so the steps
-// that follow find them the way a shell that activated mise would.
+// addMiseToPath lets the steps that follow find the tools mise installed.
 func addMiseToPath(ctx context.Context) error {
 	out, err := run(miseCommand(ctx, "bin-paths"))
 	if err != nil {

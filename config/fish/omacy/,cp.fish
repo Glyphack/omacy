@@ -1,5 +1,3 @@
-# This file belongs to omacy and is written again on every update.
-
 function ,cp --description "Copy files to clipboard"
     if not set -q argv[1]
         echo "usage: ,cp FILE..." >&2

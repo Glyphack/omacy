@@ -51,7 +51,6 @@ func extractFiles(embeddedFS embed.FS) (string, []fs.DirEntry, error) {
 	}
 }
 
-// stagingSuffix is added to a directory name to get the place its new contents are built in.
 const stagingSuffix = ".new"
 
 func copyFS(embeddedFS embed.FS, targetDir string) error {
@@ -88,8 +87,8 @@ func copyFS(embeddedFS embed.FS, targetDir string) error {
 	return replaceDir(staging, targetDir)
 }
 
-// replaceDir puts staging where target is in a single step. Anything watching target sees the old
-// files or the new ones, never a directory that is missing or half written.
+// replaceDir swaps staging into target in one step, so anything watching target never sees a half
+// written directory.
 func replaceDir(staging, target string) error {
 	missing, err := pathMissing(target)
 	if err != nil {

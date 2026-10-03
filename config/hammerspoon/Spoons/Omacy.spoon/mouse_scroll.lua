@@ -13,9 +13,7 @@ local BAND_WIDTH = 3
 local TIP_RADIUS = 4.5
 local FADE_IN = 0.08
 local FADE_OUT = 0.25
--- how much each new pointer movement counts against the earlier ones
 local MOTION_SMOOTHING = 0.35
--- an arrow lights up when the movement along it is at least this share of the strongest one
 local LIT_SHARE = 0.5
 
 local ACCENT_COLOR = { list = "System", name = "controlAccentColor" }
@@ -34,7 +32,6 @@ local DISC = 2
 local FIRST_ARROW = 3
 local TIP = FIRST_ARROW + #DIRECTIONS
 
--- The corners of a triangle around center that points toward direction.
 local function arrowPoints(center, direction)
 	local sideX, sideY = -direction.y, direction.x
 	local function at(distance, side)
@@ -50,13 +47,9 @@ local function arrowPoints(center, direction)
 	}
 end
 
--- Draws a pan scroll on screen: a ring where the drag started, arrows in the
--- ring that light up for the way the pointer moves, and a band from the ring
--- to the pointer.
 local PanIndicator = {}
 PanIndicator.__index = PanIndicator
 
--- point is where the drag started, in screen coordinates.
 function PanIndicator.new(point)
 	local frame = hs.mouse.getCurrentScreen():fullFrame()
 	local self = setmetatable({ origin = { x = frame.x, y = frame.y }, motion = { x = 0, y = 0 } }, PanIndicator)
@@ -73,8 +66,6 @@ function PanIndicator:toCanvas(point)
 	return { x = point.x - self.origin.x, y = point.y - self.origin.y }
 end
 
--- The point where a line from the anchor to tip leaves the ring, or tip
--- itself while it is still inside the ring.
 function PanIndicator:ringEdgeToward(tip)
 	local dx, dy = tip.x - self.anchor.x, tip.y - self.anchor.y
 	local distance = math.sqrt(dx * dx + dy * dy)
@@ -128,8 +119,6 @@ function PanIndicator:elements()
 	return elements
 end
 
--- Stretches the band to point, given in screen coordinates, and lights the
--- arrows for the pointer movement dx, dy.
 function PanIndicator:follow(point, dx, dy)
 	local tip = self:toCanvas(point)
 	self.canvas:elementAttribute(BAND, "coordinates", { self:ringEdgeToward(tip), tip })

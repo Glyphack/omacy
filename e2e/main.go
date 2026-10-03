@@ -54,7 +54,6 @@ func main() {
 	}
 }
 
-// windowFlag takes a leading -window off the arguments.
 func windowFlag(args []string) (bool, []string) {
 	if len(args) > 0 && args[0] == "-window" {
 		return true, args[1:]
@@ -80,8 +79,7 @@ func run(window bool, omacyArgs []string) error {
 	return vm.runOmacy(omacyArgs)
 }
 
-// buildBase makes the VM that run clones from and shuts it down so its disk can be copied. A base
-// that fails half way is deleted, so run does not clone it.
+// buildBase deletes a base that fails half way, so run does not clone it.
 func buildBase(window bool) error {
 	if err := build(); err != nil {
 		return err
@@ -115,7 +113,6 @@ func ssh(command []string) error {
 	return VM{Name: devVMName, IP: ip}.shell(command...)
 }
 
-// startVM makes a fresh VM called name from source and boots it. A VM with that name is replaced.
 func startVM(name, source string, window bool) (VM, error) {
 	vm := VM{Name: name}
 	if err := deleteVM(name); err != nil {
@@ -141,7 +138,6 @@ func (vm VM) configure() error {
 	return nil
 }
 
-// runOmacy copies the built binary into the VM and starts it there with this terminal attached.
 func (vm VM) runOmacy(args []string) error {
 	if err := vm.copy(binary, "omacy"); err != nil {
 		return err
@@ -154,7 +150,7 @@ func (vm VM) runOmacy(args []string) error {
 
 const binary = "bin/omacy"
 
-// build compiles omacy for the VM the way the release does. It expects to run from the repository root.
+// build expects to run from the repository root.
 func build() error {
 	fmt.Printf("building %s\n", binary)
 	cmd := exec.Command("go", "build", "-o", binary, ".")

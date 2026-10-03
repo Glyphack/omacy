@@ -70,9 +70,6 @@ function window.maximize()
 	end)
 end
 
--- Focuses win and puts the mouse pointer in its middle, so keyboard and mouse
--- both land on the screen the window sits on. frame() already gives the final
--- frame while a move is still animating.
 local function followWindow(win)
 	win:focus()
 	hs.mouse.absolutePosition(win:frame().center)

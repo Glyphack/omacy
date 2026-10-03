@@ -15,12 +15,9 @@ const (
 	image    = "ghcr.io/cirruslabs/macos-tahoe-vanilla:26.6.2"
 	user     = "admin"
 	password = "admin"
-
-	// sshWait is how long a booted VM gets to start taking ssh logins.
-	sshWait = 5 * time.Minute
+	sshWait  = 5 * time.Minute
 )
 
-// VM is a tart virtual machine. IP is known once the machine has booted.
 type VM struct {
 	Name string
 	IP   string
@@ -47,8 +44,7 @@ func writeAskpass() error {
 	return nil
 }
 
-// boot starts the VM in the background, so it outlives this program, and waits until it takes ssh logins.
-// What tart run prints goes to a log file, which is shown when the VM never gets an address.
+// boot starts the VM in its own session, so it outlives this program.
 func (vm *VM) boot(window bool) error {
 	args := []string{"run", vm.Name}
 	if !window {
@@ -89,7 +85,6 @@ func (vm *VM) boot(window bool) error {
 	return nil
 }
 
-// deleteVM removes the VM, stopping it first. A VM that is not there is fine.
 func deleteVM(name string) error {
 	if _, err := tart("get", name); err != nil {
 		if errors.Is(err, exec.ErrNotFound) {
@@ -112,9 +107,8 @@ func (vm VM) sshCmd(command ...string) *exec.Cmd {
 	return cmd
 }
 
-// shell runs command through the login shell of the VM with this terminal attached, or opens that
-// shell when there is no command. The login shell has the PATH a person gets in a terminal, which a
-// plain ssh command does not.
+// shell runs command through the login shell of the VM, since a plain ssh command does not get the
+// PATH a person gets in a terminal.
 func (vm VM) shell(command ...string) error {
 	if len(command) > 0 {
 		command = []string{"$SHELL", "-lc", quote(strings.Join(command, " "))}
@@ -129,7 +123,6 @@ func quote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
-// copy puts a local file into the home directory of the VM.
 func (vm VM) copy(local, remote string) error {
 	args := append(append([]string{}, sshOptions...), local, user+"@"+vm.IP+":"+remote)
 	cmd := exec.Command("scp", args...)
@@ -141,7 +134,6 @@ func (vm VM) copy(local, remote string) error {
 	return nil
 }
 
-// tart runs a tart command quietly and returns what it printed.
 func tart(args ...string) (string, error) {
 	out, err := exec.Command("tart", args...).CombinedOutput()
 	if err != nil {
@@ -150,7 +142,6 @@ func tart(args ...string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// tartRun runs a tart command with its output on this terminal, for the slow ones that show progress.
 func tartRun(args ...string) error {
 	cmd := exec.Command("tart", args...)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr

@@ -1,5 +1,3 @@
-# This file belongs to omacy and is written again on every update.
-
 set -a fish_function_path $__fish_config_dir/omacy
 
 fish_add_path --path $HOME/.local/bin

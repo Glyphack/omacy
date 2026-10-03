@@ -1,5 +1,3 @@
-# This file belongs to omacy and is written again on every update.
-
 function fish_prompt
     set -l last_status $status
 

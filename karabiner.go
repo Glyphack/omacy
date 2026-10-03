@@ -71,7 +71,6 @@ type KarabinerNotificationWindowColors struct {
 	TextColor       string `json:"text_color,omitempty"`
 }
 
-// KarabinerMachineSpecific holds the settings of one machine, keyed by machine identifier.
 type KarabinerMachineSpecific struct {
 	EnableMultitouchExtension *bool  `json:"enable_multitouch_extension,omitempty"`
 	ExternalEditorPath        string `json:"external_editor_path,omitempty"`
@@ -100,8 +99,6 @@ type KarabinerVirtualHIDKeyboard struct {
 	IndicateStickyModifierKeysState *bool  `json:"indicate_sticky_modifier_keys_state,omitempty"`
 }
 
-// KarabinerSimpleModification is one row of the simple modifications or function keys table. From
-// and To hold key event definitions, which omacy passes through untouched.
 type KarabinerSimpleModification struct {
 	From json.RawMessage `json:"from,omitempty"`
 	To   json.RawMessage `json:"to,omitempty"`
@@ -171,7 +168,6 @@ type KarabinerDevice struct {
 	GamePadStickHorizontalWheelFormula                            string   `json:"game_pad_stick_horizontal_wheel_formula,omitempty"`
 }
 
-// KarabinerDeviceIdentifiers picks out a device. The fields that are set all have to match.
 type KarabinerDeviceIdentifiers struct {
 	VendorID         *int   `json:"vendor_id,omitempty"`
 	ProductID        *int   `json:"product_id,omitempty"`
@@ -198,8 +194,7 @@ type karabinerGuidance struct {
 }
 
 type karabinerApp struct {
-	path string
-	// rawConfig and config stay nil until karabiner.json is read or started.
+	path      string
 	rawConfig map[string]any
 	config    *KarabinerConfig
 }
@@ -212,8 +207,6 @@ func karabinerConfigPath() string {
 	return filepath.Join(ConfigDir, "karabiner", "karabiner.json")
 }
 
-// openKarabiner reads karabiner.json. A machine where Karabiner has never run has no
-// karabiner.json, and the app comes back holding no configuration.
 func openKarabiner() (*karabinerApp, error) {
 	app := &karabinerApp{path: karabinerConfigPath()}
 
@@ -256,8 +249,6 @@ func (a *karabinerApp) decode(data []byte) error {
 	return nil
 }
 
-// createDefaultConfig puts the one profile a machine without karabiner.json needs into the app,
-// with the omacy rules already in it.
 func (a *karabinerApp) createDefaultConfig(profileName string, rules []KarabinerComplexModificationsRule) error {
 	data, err := json.Marshal(KarabinerConfig{
 		Profiles: []KarabinerProfile{
@@ -424,8 +415,6 @@ func karabinerErrorLine(printed string) (string, bool) {
 	return "", false
 }
 
-// profileName is the profile omacy writes its rules into: the one Karabiner runs, or the one
-// karabiner.json marks as selected, or the name Karabiner gives a fresh profile.
 func (a *karabinerApp) profileName(ctx context.Context) string {
 	name, err := runKarabiner(ctx, "--show-current-profile-name")
 	if err != nil {

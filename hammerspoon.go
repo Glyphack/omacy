@@ -110,8 +110,8 @@ func runHammerspoonLua(ctx context.Context, lua string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// hammerspoonPermission restarts Hammerspoon, so it runs the config omacy wrote and sees permissions
-// given since it last started, and then asks it whether it has accessibility access.
+// hammerspoonPermission restarts Hammerspoon first, so it loads the new config and sees permissions
+// given since it last started.
 func hammerspoonPermission(ctx context.Context) (bool, error) {
 	if err := restartHammerspoon(ctx); err != nil {
 		return false, err

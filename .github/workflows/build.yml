@@ -2,6 +2,7 @@ name: Build
 
 on:
   push:
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -15,9 +16,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: go.mod
           cache: true
@@ -28,6 +29,10 @@ jobs:
           GOOS: darwin
           GOARCH: arm64
         run: go build -trimpath -ldflags="-s -w" -o dist/omacy-darwin-arm64 .
+
+      - name: Write checksum
+        working-directory: dist
+        run: sha256sum omacy-darwin-arm64 > omacy-darwin-arm64.sha256
 
       - name: Publish dev build
         env:

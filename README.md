@@ -13,9 +13,9 @@ It works both on a brand new Mac and if you already have things installed.
 
 ## Features
 
-- Sets sane defaults for settings, for example holding down a key repeats faster.
-- Installs apps and tools using Mise and Homebrew so no manual installation is needed.
 - Creates keyboard shortcuts for managing windows, launching apps, and more.
+- Sets sane defaults for settings, for example holding down a key repeats faster.
+- Open any app with caps lock and another key.
 - You can customize anything.
 
 ## Manual
@@ -123,6 +123,19 @@ omacy.audio.prefer({
 	output = { "WH-1000XM5", "MacBook Pro Speakers" },
 	input = { "Yeti Stereo Microphone", "MacBook Pro Microphone" },
 })
+```
+
+### Translation
+
+There's a builtin translator for text on the screen. You can select any text and press `Hyper + \` and it will be translated.
+Pressing this key combination without selecting any text and it will read the text from clipboard or just waits for you to type in.
+
+You can customize the translator language and keybinding:
+
+```lua
+omacy:map(omacy.HYPER, "e", function()
+	omacy.translate:translateSelectionPopup({ from = "en", to = "nl" })
+end, "translate English to Dutch")
 ```
 
 ### Apps
@@ -316,3 +329,10 @@ Config: `~/.config/mise/conf.d/omacy.toml`
 [Raycast](https://www.raycast.com/) is installed but not configured.
 
 [^hammerspoon-config]: Put this code in `~/.hammerspoon/init.lua` between the `Omacy load` and `Omacy apply` blocks, then reload Hammerspoon from its menu bar icon.
+
+## Thanks
+
+This setup is configuration of different tools.
+All the tools above deserve credit.
+
+Also [Diego Zamboni](https://zzamboni.org/) guides was really helpful for me to get started.

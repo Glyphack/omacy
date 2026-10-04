@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/cirruslabs/echelon"
+	"github.com/cirruslabs/echelon/renderers"
 )
 
 var HomeDir string
@@ -28,13 +30,21 @@ var LogFile *os.File
 
 func runStep(ctx context.Context, title string, action func(context.Context) error) error {
 	slog.Info(title)
-	err := action(ctx)
-	if err != nil {
-		fmt.Println("Failed: " + title)
-		return err
+	if Verbose {
+		return action(ctx)
 	}
-	fmt.Println("Done: " + title)
-	return nil
+
+	renderer := renderers.NewInteractiveRenderer(os.Stdout, nil)
+	go renderer.StartDrawing()
+	root := echelon.NewLogger(echelon.InfoLevel, renderer)
+	step := root.Scoped(title)
+
+	err := action(ctx)
+
+	step.Finish(err == nil)
+	root.Finish(err == nil)
+	renderer.StopDrawing()
+	return err
 }
 
 func mustRunStep(ctx context.Context, title string, action func(context.Context) error) {
@@ -220,9 +230,12 @@ func install(ctx context.Context, config Config) {
 	}
 
 	if config.macOS.anyOn() {
-		if err := runStep(ctx, "Applying macOS settings", config.macOS.apply); err != nil {
-			slog.Warn("Some macOS settings did not apply", "err", err)
-		}
+		var report settingsReport
+		mustRunStep(ctx, "Applying macOS settings", func(ctx context.Context) error {
+			report = config.macOS.apply(ctx)
+			return nil
+		})
+		report.print()
 		restartSettingReaders(ctx)
 		fmt.Println("Some settings only take effect after you log out or restart.")
 	}

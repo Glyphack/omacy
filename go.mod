@@ -6,6 +6,7 @@ require (
 	charm.land/bubbletea/v2 v2.0.10
 	charm.land/lipgloss/v2 v2.0.6
 	github.com/charmbracelet/log v1.0.0
+	github.com/cirruslabs/echelon v1.9.0
 )
 
 require (
@@ -15,6 +16,7 @@ require (
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 )
 
 require (

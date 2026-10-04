@@ -46,9 +46,9 @@ func writeAskpass() error {
 
 // boot starts the VM in its own session, so it outlives this program.
 func (vm *VM) boot(window bool) error {
-	args := []string{"run", vm.Name}
-	if !window {
-		args = append(args, "--no-graphics")
+	args := []string{"run", vm.Name, "--no-graphics"}
+	if window {
+		args = []string{"run", vm.Name, "--capture-system-keys"}
 	}
 	logPath := filepath.Join(os.TempDir(), "omacy-e2e-"+vm.Name+".log")
 	logFile, err := os.Create(logPath)

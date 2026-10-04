@@ -56,28 +56,43 @@ func (s setting) apply(ctx context.Context) []settingFailure {
 	return failures
 }
 
-func (groups settingGroups) apply(ctx context.Context) error {
-	var failures []settingFailure
+type settingsReport struct {
+	applied []string
+	failed  []string
+}
+
+func (groups settingGroups) apply(ctx context.Context) settingsReport {
+	var report settingsReport
 	for _, group := range groups {
 		for _, s := range group.settings {
 			if !s.on {
 				continue
 			}
-			failed := s.apply(ctx)
-			if len(failed) > 0 {
-				failures = append(failures, failed...)
+			failures := s.apply(ctx)
+			for _, failure := range failures {
+				slog.Error("Setting failed", "setting", failure.setting, "command", failure.command, "output", failure.output, "err", failure.err)
+			}
+			if len(failures) > 0 {
+				report.failed = append(report.failed, s.title)
 				continue
 			}
 			slog.Info(s.help, "group", group.name)
+			report.applied = append(report.applied, s.title)
 		}
 	}
-	for _, failure := range failures {
-		slog.Error("Setting failed", "setting", failure.setting, "command", failure.command, "output", failure.output, "err", failure.err)
+	return report
+}
+
+func (r settingsReport) print() {
+	for _, title := range r.applied {
+		fmt.Println("Applied: " + title)
 	}
-	if len(failures) > 0 {
-		return fmt.Errorf("%d macOS settings did not apply", len(failures))
+	for _, title := range r.failed {
+		fmt.Println("Failed: " + title)
 	}
-	return nil
+	if len(r.failed) > 0 {
+		fmt.Println("Some macOS settings failed to apply. The installation log has the details.")
+	}
 }
 
 func restartSettingReaders(ctx context.Context) {

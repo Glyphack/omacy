@@ -14,7 +14,7 @@ const usage = `usage: go run ./e2e <command>
   ssh [command]               open a shell in the VM, or run one command in its login shell
   clean                       delete the VMs made by run and base
 
--window boots the VM with a visible screen instead of headless.
+-window boots the VM with a visible screen instead of headless, and sends shortcuts like Cmd+Space to the VM.
 To start omacy again in the same VM: go run ./e2e ssh ./omacy
 `
 

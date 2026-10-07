@@ -13,6 +13,7 @@ local WindowChooser = {
 	filter = windowFilter.new():setDefaultFilter({}):keepActive(),
 	windowsById = {},
 	chooser = nil,
+	pointerTimer = nil,
 }
 
 function WindowChooser:load()
@@ -40,6 +41,10 @@ function WindowChooser:load()
 end
 
 function WindowChooser:focus(choice)
+	if self.pointerTimer then
+		self.pointerTimer:stop()
+		self.pointerTimer = nil
+	end
 	local win = self.windowsById[choice.windowId]
 	if not win then
 		return
@@ -48,6 +53,24 @@ function WindowChooser:focus(choice)
 		win:unminimize()
 	end
 	win:focus()
+	-- Wait for focus and any Space transition before moving to the selected window.
+	local attempts = 0
+	self.pointerTimer = hs.timer.doEvery(0.1, function()
+		attempts = attempts + 1
+		local focused = hs.window.focusedWindow()
+		if focused and focused:id() == choice.windowId then
+			local frame = focused:frame()
+			local pointer = hs.geometry(hs.mouse.absolutePosition())
+			if not pointer:inside(frame) then
+				hs.mouse.absolutePosition(frame.center)
+			end
+			self.pointerTimer:stop()
+			self.pointerTimer = nil
+		elseif attempts >= 30 then
+			self.pointerTimer:stop()
+			self.pointerTimer = nil
+		end
+	end)
 end
 
 function WindowChooser:show()

@@ -26,6 +26,19 @@ var Verbose bool
 
 var LogFile *os.File
 
+// Block lettering in the Delta Corps Priest 1 style used by Omarchy.
+const installBanner = `
+ ▄██████▄     ▄▄▄▄███▄▄▄▄       ▄████████  ▄████████ ▄██   ▄
+███    ███  ▄██▀▀▀███▀▀▀██▄   ███    ███ ███    ███ ███   ██▄
+███    ███  ███   ███   ███    ███    ███ ███    █▀  ███▄▄▄███
+███    ███  ███   ███   ███    ███    ███ ███        ▀▀▀▀▀▀███
+███    ███  ███   ███   ███  ▀███████████ ███        ▄██   ███
+███    ███  ███   ███   ███    ███    ███ ███    █▄  ███   ███
+███    ███  ███   ███   ███    ███    ███ ███    ███ ███   ███
+ ▀██████▀    ▀█   ███   █▀     ███    █▀  ████████▀   ▀█████▀
+
+`
+
 func runStep(ctx context.Context, title string, action func(context.Context) error) error {
 	if Verbose {
 		slog.Info(title)

@@ -565,7 +565,15 @@ func (m *configForm) hints() []string {
 }
 
 func (m *configForm) bodyHeight() int {
-	return max(m.height-headerLines-1-helpLines-len(m.hints()), 1)
+	return max(m.height-headerLines-len(m.bannerLines())-1-helpLines-len(m.hints()), 1)
+}
+
+func (m *configForm) bannerLines() []string {
+	banner := strings.Trim(installBanner, "\n")
+	if lipgloss.Width(banner) > m.formWidth() || m.height < 24 {
+		banner = "OMACY"
+	}
+	return append(strings.Split(m.styles.zone.Render(banner), "\n"), "")
 }
 
 func (m *configForm) tabRow() (string, string) {
@@ -663,7 +671,11 @@ func (m *configForm) View() tea.View {
 	}
 	l := m.layout()
 	tabs, under := m.tabRow()
-	lines := center(tabs + "\n" + under)
+	var lines []string
+	for _, line := range m.bannerLines() {
+		lines = append(lines, center(line)...)
+	}
+	lines = append(lines, center(tabs+"\n"+under)...)
 	lines = append(lines, "")
 	lines = append(lines, center(m.installLine())...)
 	lines = append(lines, "")
